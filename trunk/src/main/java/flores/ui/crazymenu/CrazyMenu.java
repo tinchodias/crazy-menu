@@ -1,9 +1,17 @@
 package flores.ui.crazymenu;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -13,6 +21,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.KeyStroke;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -43,8 +53,31 @@ public class CrazyMenu extends JComponent {
 		if (superList != null) {
 			list.registerKeyboardAction(returnToSuperListAction(superList), KeyStroke.getKeyStroke("pressed LEFT"), JComponent.WHEN_FOCUSED);
 		}
+
+		list.addFocusListener(removeSubListsListener());
 		
 		return list;
+	}
+
+	private FocusListener removeSubListsListener() {
+		return new FocusListener() {
+
+			public void focusGained(FocusEvent event) {
+				Object focusedList = event.getSource();
+				List<Component> lists = Arrays.asList(getComponents());
+				int indexOfFocusedList = lists.indexOf(focusedList);
+				
+				for (Iterator iterator = lists.listIterator(indexOfFocusedList + 1); iterator.hasNext();) {
+					Component listToRemove = (Component) iterator.next();
+					listToRemove.setVisible(false);
+					remove(listToRemove);
+				}
+				CrazyMenu.this.validate();
+			}
+
+			public void focusLost(FocusEvent event) {
+			}
+		};
 	}
 
 	private ListSelectionListener listSelectionListener() {
@@ -112,13 +145,13 @@ public class CrazyMenu extends JComponent {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JList list = (JList) e.getSource();
-				list.setVisible(false);
-				remove(list);
-				validate();
-				
+//				JList list = (JList) e.getSource();
+//				list.setVisible(false);
+//				remove(list);
+//				validate();
+			
 				superList.requestFocusInWindow();
-//				System.out.println("return");
+//				System.out.println("return from " + list);
 			}
 			
 		};
