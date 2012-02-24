@@ -14,9 +14,13 @@ import flores.ui.crazymenu.ActionItem;
 import flores.ui.crazymenu.CompositeItem;
 import flores.ui.crazymenu.CrazyMenu;
 
-public class MainFrame extends JFrame {
+public class Demo1Frame extends JFrame {
 
-	public MainFrame() {
+	public static void main(String[] args) {
+		new Demo1Frame().setVisible(true);
+	}
+
+	public Demo1Frame() {
 		setSize(800, 600);
 		setLocationRelativeTo(null);
 		initComponents();
