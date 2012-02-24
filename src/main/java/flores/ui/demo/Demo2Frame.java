@@ -45,24 +45,13 @@ public class Demo2Frame extends JFrame {
 		return items;
 	}
 
-	private ArrayList<AbstractItem> personsItems() {
-		ArrayList<AbstractItem> items = new ArrayList<AbstractItem>();
-		items.add(nullItem("Sesión"));
-		items.add(new CompositeItem("Personas", randomPersonItems()));
-		items.add(nullItem("Stock"));
-		items.add(nullItem("Caja"));
-		items.add(nullItem("Informes"));
-
-		return items;
-	}
-
 	private ArrayList<AbstractItem> randomPersonItems() {
 		Random random = new Random();
 		ArrayList<AbstractItem> items = new ArrayList<AbstractItem>();
 
 		for (int i = 0; i < 20; i++) {
 			String[] names = new String[] {"Elvira", "Cuca", "Marcelo", "Pepe", "Cacho"};
-			String randomName = names[random.nextInt(names.length)];
+			String randomName = names[random.nextInt(names.length)] + random.nextLong();
 
 			items.add(personItem(randomName));
 		}
