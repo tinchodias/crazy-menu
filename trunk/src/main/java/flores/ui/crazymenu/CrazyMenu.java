@@ -1,27 +1,38 @@
 package flores.ui.crazymenu;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import org.jdesktop.core.animation.timing.Animator;
+import org.jdesktop.core.animation.timing.PropertySetter;
+import org.jdesktop.core.animation.timing.interpolators.AccelerationInterpolator;
 
 import flores.ui.crazymenu.layout.CrazyCrazyLayout;
 
@@ -29,18 +40,71 @@ import flores.ui.crazymenu.layout.CrazyCrazyLayout;
 
 public class CrazyMenu extends JComponent {
 
+	private JPanel panel;
+	private JViewport view;
+	private Animator animator;
+	
 	public CrazyMenu(List<AbstractItem> items) {
-		setLayout(new CrazyCrazyLayout());
+		setLayout(new BorderLayout());
+
+		panel = new JPanel();
+		panel.setLayout(new CrazyCrazyLayout());
+		view = new JViewport();
+		view.add(panel);
+		
+		view.addComponentListener(new ComponentListener() {
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				adjustView();
+			}
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+			}
+
+		});
+		
+		add(view, BorderLayout.CENTER);
 		
 		//add main menu
 		JComponent base = newListFor(null, items);
-		add(base, new Integer(200));
+		panel.add(base, new Integer(200));
 	}
 
+	private void adjustView() {
+		int lastRight = (int) panel.getComponent(panel.getComponentCount() - 1).getBounds().getMaxX();
+		int newX = Math.max(0, lastRight - this.getWidth());
+		Point newLocation = new Point(newX, 0);
+		
+		if (animator != null) {
+			animator.cancel();
+			animator.clearTargets();
+		} else {
+			animator = new Animator.Builder().setDuration(250, TimeUnit.MILLISECONDS).build();
+		}
+
+		animator.addTarget(
+				PropertySetter.getTargetTo(
+						view, 
+						"viewPosition", 
+						new AccelerationInterpolator(0.5, 0.5), 
+						newLocation ));
+		
+		animator.start();
+	}
+	
 	private JComponent newListFor(JList superList, List<AbstractItem> items) {
 		JList list = new JList(new Vector<AbstractItem>(items));
 		list.setSelectedIndex(0);
-//		list.setAutoscrolls(true);
 		list.setVisibleRowCount(items.size());
 
 		list.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -64,7 +128,7 @@ public class CrazyMenu extends JComponent {
 
 			public void focusGained(FocusEvent event) {
 				Component focused = (Component) event.getSource();
-				List<Component> components = Arrays.asList(getComponents());
+				List<Component> components = Arrays.asList(panel.getComponents());
 				int indexOfFocused = components.indexOf(focused.getParent().getParent());
 				
 				if (indexOfFocused == -1) {
@@ -74,10 +138,10 @@ public class CrazyMenu extends JComponent {
 				for (Iterator<Component> iterator = components.listIterator(indexOfFocused + 1); iterator.hasNext();) {
 					Component componentToRemove = iterator.next();
 					componentToRemove.setVisible(false);
-					CrazyMenu.this.remove(componentToRemove);
+					panel.remove(componentToRemove);
 				}
-				CrazyMenu.this.validate();
-
+				panel.validate();
+				adjustView();
 			}
 
 			public void focusLost(FocusEvent event) {
@@ -122,11 +186,12 @@ public class CrazyMenu extends JComponent {
 					Rectangle cellBounds = list.getCellBounds(list.getSelectedIndex(), list.getSelectedIndex());
 					//TODO issue resizing window
 					Integer verticalGap = list.getParent().getParent().getY() + list.getY() + cellBounds.y + (cellBounds.height / 2);
-					System.out.println("y: " + verticalGap);
 					
-					CrazyMenu.this.add(subList, verticalGap);
+					panel.add(subList, verticalGap);
 
-					CrazyMenu.this.validate();
+					panel.validate();
+					adjustView(); 
+					
 					((Container) subList.getComponent(0)).getComponent(0).requestFocusInWindow();
 				}
 			}
