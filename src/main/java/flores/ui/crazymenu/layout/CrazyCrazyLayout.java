@@ -27,12 +27,12 @@ public class CrazyCrazyLayout implements LayoutManager2 {
 
 	@Override
 	public Dimension minimumLayoutSize(Container arg0) {
-		return new Dimension(800, 600); //TODO
+		return new Dimension(5, 5); 
 	}
 	
 	@Override
 	public Dimension preferredLayoutSize(Container arg0) {
-		return new Dimension(800, 600); //TODO
+		return new Dimension(Integer.MAX_VALUE, 5);
 	}
 	
 	@Override
@@ -40,28 +40,17 @@ public class CrazyCrazyLayout implements LayoutManager2 {
 		List<Component> components = Arrays.asList(pane.getComponents());
 		Point anchor = new Point(0, 0);
 		
+		System.out.println(pane.getBounds());
+		
 		for (Iterator<Component> iterator = components.iterator(); iterator.hasNext();) {
 			Component component = iterator.next();
 			anchor.y = this.components.get(component);
 			layout(pane, component, anchor);
 			anchor.x += component.getWidth();
 		}
-		
-		if (!components.isEmpty()) {
-			ensureLastIsVisible(pane, components);
-		}
+
 	}
 
-	private void ensureLastIsVisible(Container pane, List<Component> components) {
-		double maxX = components.get(components.size() - 1).getBounds().getMaxX();
-		if (maxX > pane.getBounds().getMaxX()) {
-			for (Iterator<Component> iterator = components.iterator(); iterator.hasNext();) {
-				Component component = iterator.next();
-				Point location = component.getLocation();
-				component.setLocation(location.x - (pane.getWidth() / 2), location.y);
-			}
-		}
-	}
 	
 	private void layout(Component pane, Component component, Point anchor) {
 		Dimension size = component.getPreferredSize();
