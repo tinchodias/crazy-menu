@@ -12,14 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import flores.ui.crazymenu.CrazyYPos;
+
 public class CrazyCrazyLayout implements LayoutManager2 {
 
-	private Map<Component, Integer> components;
+	private Map<Component, CrazyYPos> components = new HashMap<Component, CrazyYPos>();
 
-	public CrazyCrazyLayout() {
-		components = new HashMap<Component, Integer>();
-	}
-	
 	@Override
 	public Dimension maximumLayoutSize(Container arg0) {
 		return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -38,13 +36,11 @@ public class CrazyCrazyLayout implements LayoutManager2 {
 	@Override
 	public void layoutContainer(Container pane) {
 		List<Component> components = Arrays.asList(pane.getComponents());
-		Point anchor = new Point(0, 0);
-		
-		System.out.println(pane.getBounds());
+		Point anchor = new Point(pane.getInsets().left, 0);
 		
 		for (Iterator<Component> iterator = components.iterator(); iterator.hasNext();) {
 			Component component = iterator.next();
-			anchor.y = this.components.get(component);
+			anchor.y = this.components.get(component).getYPos();
 			layout(pane, component, anchor);
 			anchor.x += component.getWidth();
 		}
@@ -71,7 +67,7 @@ public class CrazyCrazyLayout implements LayoutManager2 {
 	
 	@Override
 	public void addLayoutComponent(Component component, Object param) {
-		components.put(component, (Integer) param);
+		components.put(component, (CrazyYPos) param);
 	}
 	
 	@Override
