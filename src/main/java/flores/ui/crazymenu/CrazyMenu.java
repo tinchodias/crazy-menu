@@ -51,8 +51,21 @@ public class CrazyMenu extends JComponent {
 		panel.setLayout(new CrazyCrazyLayout());
 		view = new JViewport();
 		view.add(panel);
+		view.addComponentListener(adjustViewComponentListener());
 		
-		view.addComponentListener(new ComponentListener() {
+		add(view, BorderLayout.CENTER);
+		
+		//add main menu
+		final JComponent base = newListFor(null, items);
+		panel.add(base, new CrazyYPos() {
+			public Integer getYPos() {
+				return (int) (CrazyMenu.this.getBounds().getCenterY());
+			}
+		});
+	}
+
+	private ComponentListener adjustViewComponentListener() {
+		return new ComponentListener() {
 
 			@Override
 			public void componentHidden(ComponentEvent e) {
@@ -71,17 +84,7 @@ public class CrazyMenu extends JComponent {
 			public void componentShown(ComponentEvent e) {
 			}
 
-		});
-		
-		add(view, BorderLayout.CENTER);
-		
-		//add main menu
-		final JComponent base = newListFor(null, items);
-		panel.add(base, new CrazyYPos() {
-			public Integer getYPos() {
-				return (int) (CrazyMenu.this.getBounds().getCenterY());
-			}
-		});
+		};
 	}
 
 	private void adjustView() {
@@ -106,7 +109,7 @@ public class CrazyMenu extends JComponent {
 		animator.start();
 	}
 	
-	private JComponent newListFor(JList superList, List<AbstractItem> items) {
+	private JComponent newListFor(JComponent superComponent, List<AbstractItem> items) {
 		final JList list = new JList(new Vector<AbstractItem>(items));
 		list.setSelectedIndex(0);
 		list.setVisibleRowCount(items.size());
@@ -116,12 +119,10 @@ public class CrazyMenu extends JComponent {
 		list.addListSelectionListener(this.listSelectionListener());
 		list.registerKeyboardAction(performItemAction(), KeyStroke.getKeyStroke("released ENTER"), JComponent.WHEN_FOCUSED);
 		list.registerKeyboardAction(enterToSubListAction(), KeyStroke.getKeyStroke("pressed RIGHT"), JComponent.WHEN_FOCUSED);
-		if (superList != null) {
-			list.registerKeyboardAction(returnToSuperListAction(superList), KeyStroke.getKeyStroke("pressed LEFT"), JComponent.WHEN_FOCUSED);
+		if (superComponent != null) {
+			list.registerKeyboardAction(returnToSuperListAction(superComponent), KeyStroke.getKeyStroke("pressed LEFT"), JComponent.WHEN_FOCUSED);
 		}
 		list.addFocusListener(removeSubListsListener());
-
-		
 		
 		JScrollPane pane = new JScrollPane(list);
 		pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -246,16 +247,15 @@ public class CrazyMenu extends JComponent {
 		};
 	}
 
-	private ActionListener returnToSuperListAction(final JList superList) {
+	private ActionListener returnToSuperListAction(final JComponent superComponent) {
 		return new AbstractAction() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				superList.requestFocusInWindow();
+				superComponent.requestFocusInWindow();
 			}
 			
 		};
 	}
 
-	
 }
