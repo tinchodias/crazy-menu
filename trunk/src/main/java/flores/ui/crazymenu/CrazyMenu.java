@@ -76,8 +76,12 @@ public class CrazyMenu extends JComponent {
 		add(view, BorderLayout.CENTER);
 		
 		//add main menu
-		JComponent base = newListFor(null, items);
-		panel.add(base, new Integer(200));
+		final JComponent base = newListFor(null, items);
+		panel.add(base, new CrazyYPos() {
+			public Integer getYPos() {
+				return (int) (CrazyMenu.this.getBounds().getCenterY());
+			}
+		});
 	}
 
 	private void adjustView() {
@@ -103,7 +107,7 @@ public class CrazyMenu extends JComponent {
 	}
 	
 	private JComponent newListFor(JList superList, List<AbstractItem> items) {
-		JList list = new JList(new Vector<AbstractItem>(items));
+		final JList list = new JList(new Vector<AbstractItem>(items));
 		list.setSelectedIndex(0);
 		list.setVisibleRowCount(items.size());
 
@@ -117,9 +121,33 @@ public class CrazyMenu extends JComponent {
 		}
 		list.addFocusListener(removeSubListsListener());
 
+		
+		
 		JScrollPane pane = new JScrollPane(list);
 		pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		
+		pane.addComponentListener(new ComponentListener() {
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				list.ensureIndexIsVisible(list.getSelectedIndex());
+			}
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+			}
+			
+		});
+
 		return pane;
 	}
 
@@ -178,16 +206,21 @@ public class CrazyMenu extends JComponent {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JList list = (JList) e.getSource();
+				final JList list = (JList) e.getSource();
 				AbstractItem item = (AbstractItem) list.getSelectedValue();
 				
 				if (!item.getSubItems().isEmpty()) {
 					JComponent subList = newListFor(list, item.getSubItems());
-					Rectangle cellBounds = list.getCellBounds(list.getSelectedIndex(), list.getSelectedIndex());
-					//TODO issue resizing window
-					Integer verticalGap = list.getParent().getParent().getY() + list.getY() + cellBounds.y + (cellBounds.height / 2);
 					
-					panel.add(subList, verticalGap);
+					panel.add(subList, new CrazyYPos() {
+
+						@Override
+						public Integer getYPos() {
+							Rectangle cellBounds = list.getCellBounds(list.getSelectedIndex(), list.getSelectedIndex());
+							return list.getParent().getParent().getY() + /*list.getY()*/ + (int) cellBounds.getCenterY();
+						}
+						
+					});
 
 					panel.validate();
 					adjustView(); 

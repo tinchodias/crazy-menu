@@ -1,24 +1,18 @@
 package flores.ui.demo;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 
 import org.jdesktop.core.animation.timing.Animator;
-import org.jdesktop.core.animation.timing.TimingSource;
-import org.jdesktop.core.animation.timing.TimingSource.PostTickListener;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 
 import flores.ui.crazymenu.AbstractItem;
